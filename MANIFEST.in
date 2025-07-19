@@ -1,0 +1,12 @@
+include LICENSE
+include README.md
+
+recursive-include examples *.yml
+recursive-include core *.py
+recursive-include cli *.py
+recursive-include models *.py
+recursive-include snow_globe *.py
+
+recursive-include core *.sql
+recursive-include core *.yml
+recursive-include core *.json
