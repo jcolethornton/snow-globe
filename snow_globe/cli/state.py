@@ -1,11 +1,11 @@
 # cli/state.py
 import typer
 from pathlib import Path
-from models.args import StateArgs, DeployArgs
-from models.config import parse_config, merge_config
-from core.state import StateManager
-from core.deploy import DeployManager
-from core.outputs import print_plan
+from snow_globe.models.args import StateArgs, DeployArgs
+from snow_globe.models.config import parse_config, merge_config
+from snow_globe.core.state import StateManager
+from snow_globe.core.deploy import DeployManager
+from snow_globe.core.outputs import print_plan
 
 state_cmd = typer.Typer()
 

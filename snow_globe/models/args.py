@@ -1,7 +1,7 @@
 # models/args.py
 from typing import Type
 from pydantic import BaseModel, ConfigDict
-from models.mixins import (
+from snow_globe.models.mixins import (
     OutputMixin,
     StatePathMixin,
     ProfileMixin,

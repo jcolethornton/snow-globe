@@ -2,7 +2,7 @@
 import re
 import json
 from pathlib import Path
-from models.args import TraceArgs
+from snow_globe.models.args import TraceArgs
 
 class LineageManager:
 

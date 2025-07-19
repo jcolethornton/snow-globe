@@ -3,14 +3,14 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typer import style, echo
 from typer.colors import GREEN, RED, YELLOW
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from core.queries import Queries
-from core.connection import SnowConn
-from core.utils import hash_ddl, fetch_df, fetch_string
-from models.args import StateArgs
-from threading import Lock
+from snow_globe.core.queries import Queries
+from snow_globe.core.connection import SnowConn
+from snow_globe.core.utils import hash_ddl, fetch_df, fetch_string
+from snow_globe.models.args import StateArgs
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

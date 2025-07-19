@@ -1,8 +1,8 @@
 # cli/trace.py
 import typer
 from pathlib import Path
-from models.args import TraceArgs
-from core.lineage import LineageManager
+from snow_globe.models.args import TraceArgs
+from snow_globe.core.lineage import LineageManager
 
 trace_cmd = typer.Typer()
 

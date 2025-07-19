@@ -2,11 +2,11 @@
 import re
 import json
 from pathlib import Path
-from core.connection import SnowConn
-from core.utils import hash_ddl, fetch_string
-from models.args import DeployArgs, TraceArgs
-from core.ddl_diff import parse_columns, diff_columns, generate_alter
-from core.lineage import LineageManager
+from snow_globe.core.connection import SnowConn
+from snow_globe.core.utils import hash_ddl, fetch_string
+from snow_globe.core.ddl_diff import parse_columns, diff_columns, generate_alter
+from snow_globe.core.lineage import LineageManager
+from snow_globe.models.args import DeployArgs, TraceArgs
 
 class DeployManager:
     SAFE_RECREATE = [

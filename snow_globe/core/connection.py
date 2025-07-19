@@ -6,7 +6,7 @@ from jinja2 import Template
 import snowflake.connector
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from models.args import ProfileArgs
+from snow_globe.models.args import ProfileArgs
 
 class SnowConn:
 
