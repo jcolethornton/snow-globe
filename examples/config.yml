@@ -1,0 +1,21 @@
+default:
+  object_types:
+    - table
+    - view
+    - task
+    - stream
+    - procedure
+    - pipe
+    - stage
+    - function
+    - sequence
+    - file format
+  environments:
+    prod:
+      account_identifier: your_account
+      database_prefix: ""
+      database_schema:
+        - public
+    dev:
+      account_identifier: your_account
+      database_prefix: dev_

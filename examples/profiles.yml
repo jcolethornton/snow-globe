@@ -1,0 +1,10 @@
+default:
+  account_identifier: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+  user: "{{ env_var('SNOWFLAKE_USER') }}"
+  role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+  warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+  database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+  schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+  private_key_path: "{{ env_var('SNOWFLAKE_KEYPATH') }}"
+  private_key_passphrase: "{{ env_var('SNOWFLAKE_KEYPASS') }}"
+  password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
