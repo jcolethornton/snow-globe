@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Snowflake state and DDL manager CLI"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
-license = { file = "LICENSE" }
 authors = [
     { name = "Jaryd Thornton", email = "jaryd90@gmail.com" }
 ]
