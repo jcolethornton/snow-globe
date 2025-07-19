@@ -205,3 +205,15 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# snow-globe dirs
+data/
+ddl_management/
+
+# Ignore only root config.yml and profiles.yml
+/config.yml
+/profiles.yml
+
+# But do NOT ignore these files inside examples/
+!examples/config.yml
+!examples/profiles.yml
