@@ -14,23 +14,19 @@ def default(model, field):
 
 @state_cmd.command("refresh")
 def refresh(
-    profile_path: Path = typer.Option(default(StateArgs, 'profile_path'), help="Path to profile file"),
-    profile_name: str = typer.Option(default(StateArgs, 'profile_name'), help="Profile name"),
     state_path: Path = typer.Option(default(StateArgs, 'state_path'), help="Path to state file"),
     threads: int = typer.Option(None, help="Number of concurrent threads"),
     verbose: bool = typer.Option(False, help="Enable verbose logging"),
     quiet: bool = typer.Option(False, help="Suppress output"),
 ):
     cli_args = {
-        "profile_path": profile_path,
-        "profile_name": profile_name,
         "state_path": state_path,
         "threads": threads,
         "verbose": verbose,
         "quiet": quiet,
     }
 
-    config = parse_config(profile_name, StateArgs)
+    config = parse_config(StateArgs)
     args = merge_config(cli_args, config, StateArgs)
 
     state = StateManager(args)
@@ -40,8 +36,6 @@ def refresh(
 @state_cmd.command("plan")
 def plan(
     environment: str = typer.Option(default(DeployArgs, 'environment'), help="Environment [prod|dev]"),
-    profile_path: Path = typer.Option(default(DeployArgs, 'profile_path'), help="Path to profile file"),
-    profile_name: str = typer.Option(default(DeployArgs, 'profile_name'), help="Profile name"),
     state_path: Path = typer.Option(default(DeployArgs, 'state_path'), help="Path to state file"),
     sql_path: Path = typer.Option(None, help="Path to SQL files"),
     plan_path: Path = typer.Option(None, help="Path to plan file"),
@@ -50,8 +44,6 @@ def plan(
 ):
     cli_args = {
         "environment": environment,
-        "profile_path": profile_path,
-        "profile_name": profile_name,
         "state_path": state_path,
         "sql_path": sql_path,
         "plan_path": plan_path,
@@ -59,7 +51,7 @@ def plan(
         "quiet": quiet,
     }
 
-    config = parse_config(profile_name, DeployArgs, environment)
+    config = parse_config(DeployArgs, environment)
     args = merge_config(cli_args, config, DeployArgs)
 
     deploy = DeployManager(args)
@@ -69,8 +61,6 @@ def plan(
 @state_cmd.command("apply")
 def apply(
     environment: str = typer.Option(default(DeployArgs, 'environment'), help="Environment [prod|dev]"),
-    profile_path: Path = typer.Option(default(DeployArgs, 'profile_path'), help="Path to profile file"),
-    profile_name: str = typer.Option(default(DeployArgs, 'profile_name'), help="Profile name"),
     state_path: Path = typer.Option(default(DeployArgs, 'state_path'), help="Path to state file"),
     sql_path: Path = typer.Option(None, help="Path to SQL files"),
     plan_path: Path = typer.Option(None, help="Path to plan file"),
@@ -79,8 +69,6 @@ def apply(
 ):
     cli_args = {
         "environment": environment,
-        "profile_path": profile_path,
-        "profile_name": profile_name,
         "state_path": state_path,
         "sql_path": sql_path,
         "plan_path": plan_path,
@@ -88,7 +76,7 @@ def apply(
         "quiet": quiet,
     }
 
-    config = parse_config(profile_name, DeployArgs, environment)
+    config = parse_config(DeployArgs, environment)
     args = merge_config(cli_args, config, DeployArgs)
 
     deploy = DeployManager(args)

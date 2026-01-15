@@ -6,63 +6,56 @@ from jinja2 import Template
 import snowflake.connector
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from snow_globe.models.args import ProfileArgs
+from snow_globe.models.args import DeployArgs
 
 class SnowConn:
 
-    def __init__(self, args: ProfileArgs):
+    def __init__(self, args: DeployArgs):
         self.args = args
 
     def env_var(self, name):
         """Get an environment variable with a default value."""
         return os.getenv(name, "")
 
-    def load_profile(self):
-        """Load a connection profile from a YAML file."""
-        if not self.args.profile_path.exists():
-            raise FileNotFoundError(f"Missing connection profile: {self.args.profile_path}")
+    def load_config(self):
+        """Load a connection profile from config"""
+        if not self.args.config_path.exists():
+            raise FileNotFoundError(f"Missing config: {self.args.config_path}")
 
-        with open(self.args.profile_path) as f:
+        with open(self.args.config_path) as f:
             raw = f.read()
 
         rendered = Template(raw).render(env_var=self.env_var)
-        profiles = yaml.safe_load(rendered)
-
-        if self.args.profile_name not in profiles:
-            raise ValueError(f"Profile '{self.args.profile_name}' not found in {self.args.profile_path}")
-
-        profile = profiles.get(self.args.profile_name)
-        return profile
+        return yaml.safe_load(rendered)
 
     def get_connection(self):
-        """Create a Snowflake connection using a provided profile"""
-        profile = self.load_profile()
+        """Create a Snowflake connection"""
+        config = self.load_config()
+        if self.args.environment not in config['environments']:
+            raise Exception(f"Environment '{self.args.environment}' not found in {self.args.config_path}")
+
+        account = config['environments'][self.args.environment]['account_identifier']
         conn_params = {
-            'account': profile["account_identifier"],
-            'user': profile["user"],
-            'role': profile["role"],
-            'warehouse': profile["warehouse"],
-            'database': profile["database"],
-            'schema': profile["schema"]
+            'account': account,
+            'user': config["user"],
+            'role': config["role"],
+            'warehouse': config["warehouse"],
+            'database': self.args.default_database,
+            'schema': self.args.default_schema
         }
-
-        if profile.get("private_key_path"):
-            key_path = profile["private_key_path"]
-            with open(key_path, "rb") as key_file:
-                pkey_bytes = key_file.read()
-            pkey = serialization.load_pem_private_key(
-                pkey_bytes,
-                password=profile.get("private_key_passphrase").encode() if profile.get("private_key_passphrase") else None,
-                backend=default_backend()
-            )
-            pkb = pkey.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            )
-            conn_params['private_key'] = pkb
-
-        else:
-            conn_params['password'] = profile.get("password")
+        key_path = config["private_key_path"]
+        with open(key_path, "rb") as key_file:
+            pkey_bytes = key_file.read()
+        pkey = serialization.load_pem_private_key(
+            pkey_bytes,
+            password=config.get("private_key_passphrase").encode() if config.get("private_key_passphrase") else None,
+            backend=default_backend()
+        )
+        pkb = pkey.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        conn_params['private_key'] = pkb
 
         return snowflake.connector.connect(**conn_params)

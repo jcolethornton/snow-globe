@@ -1,4 +1,5 @@
 # core/state.py
+import re
 import json
 import logging
 from datetime import datetime
@@ -27,12 +28,12 @@ class StateManager:
     def refresh_state(self):
         self.cursor = self.conn.cursor()
         try:
-            for obj in self.args.object_types:
+            for obj in self.args.managed_schema_objects:
                 self.object_type = obj
                 self.query = self.queries(obj)
 
-                if self.args.database_schema:
-                    for database in self.args.database_schema:
+                if self.args.managed_databases:
+                    for database in self.args.managed_databases:
                         location = f"database {database}"
                         self.export_state(loc=location)
                 else:
@@ -42,7 +43,7 @@ class StateManager:
             if not self.args.quiet:
                 echo(style("-" * 60, fg=YELLOW))
                 echo(style("EXPORTED TO STATE:", fg=GREEN))
-                for obj_type in self.args.object_types:
+                for obj_type in self.args.managed_schema_objects:
                     obj_count = sum(1 for obj in self.objects.values() if obj["type"] == obj_type)
                     echo(f"• {obj_count} {obj_type}{'s' if obj_count > 1 else ''}.")
 
@@ -59,7 +60,7 @@ class StateManager:
             return Queries.SHOW_STAGE_CMD
         return Queries.SHOW_OBJECT_CMD
 
-    def get_ddl(self, object_path, **kwargs):
+    def get_ddl(self, object_path, schema_path, **kwargs):
         """Fetch DDL and update self.objects"""
         if self.object_type == "stage":
             ddl = f"""CREATE OR REPLACE STAGE {kwargs['fqn']}
@@ -88,7 +89,7 @@ class StateManager:
                 "last_seen": datetime.utcnow().isoformat()
             }
 
-        self.save_sql(object_path, ddl)
+        self.save_sql(object_path, schema_path, ddl)
         return kwargs['fqn']
 
     def export_state(self, loc):
@@ -103,16 +104,21 @@ class StateManager:
         log.debug(f"Fetched {row_count} rows from: {self.query}")
 
         def process_row(index, row):
+            def sanitize_filename(name):
+                return re.sub(r"[^\w\-_.]", "_", name)
             params = dict(row._asdict())
             params['fqn'] = f"{params.get('database_name')}.{params.get('schema_name')}.{params.get('name')}"
             params['clean_fqn'] = f"{params.get('database_name')}.{params.get('schema_name')}.{params.get('clean_name', params.get('name'))}"
-            self.schema_path = Path('ddl_management') /\
+            schema_path = Path('ddl_management') /\
                 Path(self.args.account_identifier) /\
                 Path("databases") /\
+                Path(params.get("database_name").lower()) /\
                 Path("schemas") /\
                 Path(params.get("schema_name").lower()) /\
                 Path(self.object_type.lower())
-            object_path = Path(self.schema_path) / f"{params.get('clean_name', params.get('name')).lower()}.sql"
+            filename = sanitize_filename(params.get('clean_name', params.get('name')).lower()) + ".sql"
+            object_path = Path(schema_path) / filename
+
 
             if not self.args.quiet:
                 echo(
@@ -122,7 +128,7 @@ class StateManager:
                     + style(f"{params['clean_fqn']}", fg=GREEN)
                 )
 
-            return self.get_ddl(object_path, **params)
+            return self.get_ddl(object_path=object_path, schema_path=schema_path, **params)
 
         # Run in parallel
         with ThreadPoolExecutor(max_workers=self.args.threads) as executor:
@@ -139,8 +145,8 @@ class StateManager:
                 except Exception as e:
                     echo(style(f"Error exporting {idx}: {e}", fg=RED))
 
-    def save_sql(self, object_path, ddl):
-        self.schema_path.mkdir(parents=True, exist_ok=True)
+    def save_sql(self, object_path, schema_path, ddl):
+        schema_path.mkdir(parents=True, exist_ok=True)
         with open(object_path, 'w') as f:
             f.write(ddl)
 

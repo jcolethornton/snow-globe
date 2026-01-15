@@ -1,0 +1,31 @@
+# connection variables
+{% raw %}
+user: "{{ env_var('SF_USER') }}"
+role: "{{ env_var('SF_ROLE') }}"
+warehouse: COMPUTE_WH
+private_key_path: "{{ env_var('SF_KEYPATH') }}"
+private_key_passphrase: "{{ env_var('SF_KEYPASS') }}"
+{% endraw %}
+
+# objects
+managed_schema_objects:
+{% for obj in managed_schema_objects %}
+  - {{ obj }}
+{% endfor %}
+
+# database schemas (remove to manage all databases)
+{% if managed_databases %}
+managed_databases:
+{% for db in managed_databases %}
+  - {{ db }}
+{% endfor %}
+{% endif %}
+
+environments:
+{% for env in environments %}
+  {{ env.name }}:
+    account_identifier : {{ env.account }}
+{% if database_prefix %}
+    database_prefix: {{ env.database_prefix }}
+{% endif %}
+{% endfor %}

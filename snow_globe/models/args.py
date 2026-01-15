@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict
 from snow_globe.models.mixins import (
     OutputMixin,
     StatePathMixin,
-    ProfileMixin,
     DeployMixin,
     StateMixin,
     TraceMixin
@@ -14,10 +13,7 @@ class Base(BaseModel):
     # To forbid unexpected args (optional)
     model_config = ConfigDict(extra="ignore")
 
-class RefreshArgs(Base, StatePathMixin, OutputMixin, ProfileMixin):
-    pass
-
-class ProfileArgs(Base, OutputMixin, ProfileMixin):
+class RefreshArgs(Base, StatePathMixin, OutputMixin):
     pass
 
 class DeployArgs(Base, DeployMixin):

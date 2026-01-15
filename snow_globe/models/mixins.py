@@ -16,6 +16,28 @@ class OutputMixin(BaseModel):
         description="Suppress output"
     )
 
+class ConnectionMixin(BaseModel):
+    config_path: Annotated[Path, typer.Option(help="Path to config file")] = Field(
+        default=Path("config.yml"),
+        description="Path to config file"
+    )
+    default_database: str = Field(
+        default="SNOWFLAKE",
+        description="default database for snowflake connection"
+    )
+    default_schema: str = Field(
+        default="ACCOUNT_USAGE",
+        description="default schema for snowflake connection"
+    )
+    environment: str = Field(
+        default="prod",
+        description="Environment for the connection (e.g., 'prod', 'dev')"
+    )
+    account_identifier: Optional[str] = Field(
+        default=None,
+        description="Account identifier for Snowflake connection"
+    )
+
 class StatePathMixin(BaseModel):
     state_path: Annotated[Path, typer.Option(help="Path to state file")] = Field(
         default=Path("data/state.json"),
@@ -26,17 +48,7 @@ class StatePathMixin(BaseModel):
         description="state object"
     )
 
-class ProfileMixin(BaseModel):
-    profile_path: Annotated[Path, typer.Option(help="Path to the profile file")] = Field(
-        default=Path("./profiles.yml"),
-        description="Path to the profile file"
-    )
-    profile_name: Annotated[str, typer.Option(help="Profile name")] = Field(
-        default="default",
-        description="Profile name"
-    )
-
-class DeployMixin(StatePathMixin, OutputMixin, ProfileMixin):
+class DeployMixin(ConnectionMixin, StatePathMixin, OutputMixin):
     sql_path: Annotated[Path, typer.Option(help="Path to SQL files")] = Field(
         default=Path("ddl_management"),
         description="Path to SQL files"
@@ -45,25 +57,17 @@ class DeployMixin(StatePathMixin, OutputMixin, ProfileMixin):
         default=Path("data/plan.json"),
         description="Path to plan file"
     )
-    environment: str = Field(
-        default="prod",
-        description="Environment for the connection (e.g., 'prod', 'dev')"
-    )
     database_prefix: str = Field(
         default="",
         description="database prefix"
     )
 
-class StateMixin(StatePathMixin, OutputMixin, ProfileMixin):
-    account_identifier: Optional[str] = Field(
-        default=None,
-        description="Account identifier for Snowflake connection"
-    )
-    database_schema: Optional[List[str]] = Field(
+class StateMixin(ConnectionMixin, StatePathMixin, OutputMixin):
+    managed_databases: Optional[List[str]] = Field(
         default_factory=lambda: ["SNOWFLAKE"],
         description="List of database schemas to manage"
     )
-    object_types: Optional[List[str]] = Field(
+    managed_schema_objects: Optional[List[str]] = Field(
         default_factory=lambda: ["TABLE","VIEW"],
         description="List of object types to manage"
     )
